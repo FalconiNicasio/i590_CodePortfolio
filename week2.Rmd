@@ -1,0 +1,496 @@
+---
+title: "code_portfolio"
+author: "Nicasio"
+date: "April 1, 2019"
+output: 
+  html_document:
+    toc: True
+---
+
+# Week 2
+
+[R Tutorial](http://www.r-tutor.com/r-introduction)
+
+Variable Assignment
+```{r}
+x = 1
+x
+```
+
+Functions
+```{r}
+# c() is the combine function
+c(1, 2, 3)
+```
+
+
+Getting Help
+
+```{r}
+# you can use ?function or help(function)
+?c
+```
+
+
+## Basic Data types
+
+### Numeric
+
+```{r}
+x = 10.5  # assign a decimal values
+x         # print the value of x
+class(x)  # print the class name of x
+```
+
+`Numeric` is not the same as an `integer`
+```{r}
+k = 1
+k
+class(k)
+is.integer(k) # is k an integer? is.integer function
+```
+
+### Integer
+
+How to create an `integer`
+```{r}
+y = as.integer(3)
+y
+class(y)
+is.integer(y)
+```
+Another way to create `integer`
+```{r}
+y = 3L #note adding the string "L"
+is.integer(y)
+```
+
+You can convert `numeric` values, decimal strings, and TRUE/FALSE `logical` values
+
+```{r}
+as.integer(3.64)  #coerce numeric value
+as.integer("5.67") #coerce decimal string
+as.integer(TRUE) #coerce logical values
+```
+* Note that values are rounded DOWN to the whats left of the decimal
+
+You can't convert non-decimal strings
+```{r}
+as.integer("joe")
+```
+
+### Complex
+
+A **complex** value in R is defined via the pure imaginary value of *i*.
+
+```{r}
+z = 1 +2i #create a complex number
+z
+class(z)
+```
+
+### Logical
+
+```{r}
+x = 1; y = 2  #sample values
+z = x > y     # is x greater than y? assign to variable z
+z
+class(z)
+```
+
+### Character
+
+```{r}
+x = as.character(3.14)
+x
+class(x)
+```
+
+Two character values can be concantenated with the `paste` function
+```{r}
+fname = "Joe"; lname = "Smith"
+paste(fname, lname)
+```
+
+`sprintf` function uses C language syntax
+
+```{r}
+sprintf("%s has %d dollars", "Sam", 100)
+```
+
+Extract substring with `substr` function
+
+```{r}
+substr("Mary has a little lamb.", start = 3, stop = 12)
+#start and stop uses index
+```
+
+replace a word in the character value, use `sub` function
+```{r}
+sub("little", "big", "Mary has a little lamb.")
+```
+
+## Vector
+
+A **vector** is a sequence of data elements of the same basic type
+
+```{r}
+X <- c(2, 3, 4)   #vector of numeric values
+Y <- c(TRUE, FALSE, TRUE)   #vector of logical values
+Z <- c("a", "b", "c")     #vector of characters
+```
+
+You can use `length` function to get the count of values in the vector
+```{r}
+length(Z)
+```
+
+### Combine Vectors
+```{r}
+c(X,Y,Z)
+```
+
+### Vector Arithmetics
+```{r}
+a = c(1, 3, 5, 7)
+b = c(1, 2, 4, 8)
+
+5 * a #multiply each number in vector a by 5
+a + b #adding vectors.
+a - b #subtracting vectors
+a * b #multiply vectors
+a / b #divide vectors
+```
+
+Recycling rule. If vectors are not of equal length then the the shorter vector will be "recycled" or used again for the rest of the larger vector.
+```{r}
+u = c(10, 20, 30)
+v = c(1 , 2, 3, 4, 5, 6, 7, 8, 9)
+u + v
+```
+
+### Vector index
+
+We've seen earlier with `substr` function how vectors have an index based on the position of each value.
+
+```{r}
+s = c("aa", "bb", "cc", "dd", "ee") 
+s[3]
+```
+
+You can delete using a negative symbol index
+```{r}
+s[-3]
+```
+
+You can use `c` function to grab multiple values from a `vector`
+```{r}
+s[c(2,3)] #gets 2nd and 3rd value from s vector
+s[c(2,3,3)] #gets 2nd, 3rd, and duplicate of 3rd value
+s[c(2,1,3)] #you can index out of order
+```
+
+Range index is used to slice a chunk of the vector based on a given range.
+```{r}
+s[2:4] #gets 2nd, 3rd, and 4th value of vector s
+```
+
+### Logical index
+
+You can use `logical` values to index
+```{r}
+L = c(FALSE, TRUE, FALSE, TRUE, FALSE)
+s[L]
+```
+
+### Named Vectors
+
+You can assign names to a vector using `names` function
+```{r}
+v = c("Mary", "Sue")
+names(v) = c("First", "Last")
+v["First"]
+```
+
+## Matrix
+
+A **matrix** is a collection of data elemets arranged in a two-dimensional rectangula layout. You can use the `matrix` function to make a matrix
+
+```{r}
+A = matrix(
+  c(2, 4, 3, 1, 5, 7), #the data elements
+  nrow = 2,            #number of rows
+  ncol = 3,            #number of columns
+  byrow = TRUE         #fill matrix by rows
+)
+A
+```
+
+You can index a matrix by *m*^th^ row and *n*^th^ column using A[*m*,*n*] expression
+```{r}
+A[2,3]
+```
+
+If you leave *n* empty it will return the entire row
+```{r}
+A[2,]
+```
+If you leave *m* empty it will return the entire column
+```{r}
+A[,3]
+```
+
+You can use `c` function to return more than one row or column
+```{r}
+A[,c(1,3)]
+```
+
+You can assign names to rows and columns
+```{r}
+dimnames(A) = list(
+  c("row1", "row2"),  #row names
+  c("col1", "col2", "col3")  #column names
+)
+A
+```
+
+You can now index by row and column name
+```{r}
+A["row2", "col3"]
+```
+
+### Matrix Construction
+
+The different ways to construct a matrix
+```{r}
+#classic way
+B = matrix(
+  c(2, 4, 3, 1, 5, 7),
+  nrow=3,
+  ncol=2)
+
+B
+```
+
+You can transpose a matrix using `t` function
+```{r}
+#transpose
+t(B)
+```
+
+Combining matrices by column using `cbind` function
+```{r}
+C = matrix(
+  c(7,4,2),
+  nrow = 3,
+  ncol = 1
+)
+
+cbind(B, C) #combine matrix B and C
+```
+
+Combining matrices by row using `rbind` function
+```{r}
+D = matrix(
+  c(6,2),
+  nrow = 1,
+  ncol = 2
+)
+
+rbind(B,D)
+```
+
+You can deconstuct (or flatten) a matrix using `c` function
+```{r}
+c(B)
+```
+
+## List
+
+A **list** is a like a vector but it contains different `class` objects
+
+```{r}
+n = c(2,3,5)
+s = c("aa", "bb", "cc", "dd", "ee")
+b = c(TRUE, FALSE, TRUE, FALSE, FALSE)
+x = list(n, s, b, 3)   # x contains copies of n, s, b
+x
+class(x)
+```
+
+List Slicing uses a *single square bracket* "[]"
+```{r}
+x[2] #single member of list
+
+x[c(2,4)] #multiple members of a list
+```
+
+Member reference
+using **double square brackets** "[[]]" will return a copy of the vector in the list.
+
+```{r}
+x[[2]] #returns a copy of s vector
+class(x[[2]]) #this is a character vector
+class(x[2]) #this is a slice of a list
+```
+
+You can modify a vector within a list
+```{r}
+x[[2]][1] = "ta"
+x[[2]]
+s # s is unaffected
+```
+
+### Named list members
+
+Assigning names to list members
+```{r}
+v = list(bob = c(2,3,4), john = c("aa", "bb"))
+v
+```
+List slicing with names
+```{r}
+v["bob"]
+```
+List slicing multiple names
+```{r}
+v[c("bob","john")]
+```
+
+Member reference
+```{r}
+v[["bob"]] #note double brackets
+
+v$bob #note $ symbol
+```
+
+Search Oath. You can *attach* a list to the R search path and access its members without explicitly mentioning the list. It should be *detached* for cleanup
+```{r}
+attach(v)
+bob
+detach(v)
+```
+
+## Data Frame
+
+A **data frame** is used for storing data tables. It is a list of vectors of equal length. For example, the following variable `df` is a data frame containing three vectors `n`,`s`,`b`.
+
+```{r}
+n = c(2,3,5)
+s = c("aa", "bb", "cc")
+b = c(TRUE, FALSE, TRUE)
+df = data.frame(n, s, b)
+```
+
+Built-in Data Frame
+
+```{r}
+mtcars
+```
+
+Indexing a Data Frame
+```{r}
+mtcars [1,2]  #cell value first row, second column
+mtcars["Mazda RX4", "cyl"] #index by name
+```
+
+Preview the Data Frame
+```{r}
+nrow(mtcars)  #returns number of rows of data frame
+ncol(mtcars)  #returns number of columns
+head(mtcars)  #preview the top of the Data Frame
+```
+
+```{r}
+help(mtcars)
+```
+
+### Data Frame Column Vector
+
+```{r}
+mtcars[[9]] #by index number
+mtcars[["am"]]  #by name
+mtcars$am  #using $
+mtcars[,"am"] #list index
+```
+
+### Data Frame Column Slice
+
+```{r}
+mtcars[1] #numeric indexing
+mtcars["mpg"] #name indexing
+mtcars[c("mpg", "hp")] #multiple column slice
+```
+
+### Data Frame Row Slice
+
+```{r}
+mtcars[24,] #numeric indexing
+mtcars[c(3, 24),] #multiple numeric indexing
+mtcars["Camaro Z28",] #name indexing
+mtcars[c("Datsun 710", "Camaro Z28"),] #multiple name indexing
+```
+
+```{r}
+L = mtcars$am == 0 #Logical indexing
+mtcars[L,] #list of vehicles with automatic transmissions
+mtcars[L,]$mpg #gas mileage for automatic tranmission cars
+```
+
+### Data Import
+
+**Excel File**
+
+```
+library(gdata)  #load gdata package
+mydata = read.xls("mydata.xls")  #read from first sheet
+```
+
+```
+library(XLConnect)  # load XLConnect package
+wk = loadWorkbook("mydata.xls") 
+df = readWorksheet(wk, sheet="Sheet1")
+```
+
+**Minitab File**
+
+```
+library(foreign)                 # load the foreign package 
+mydata = read.mtp("mydata.mtp")  # read from .mtp file
+```
+
+**SPSS File**
+
+```
+library(foreign)                 # load the foreign package 
+help(read.spss)                  # documentation 
+mydata = read.spss("myfile", to.data.frame=TRUE)
+```
+
+**Table File**
+
+```
+mydata = read.table("mydata.txt")  # read text file 
+mydata                             # print data frame 
+```
+
+**CSV File**
+
+```
+mydata = read.csv("mydata.csv")  # read csv file 
+mydata 
+```
+
+
+**Working Directory**
+Finally, the code samples above assume the data files are located in the R working directory, which can be found with the function getwd.
+
+`getwd()               # get current working directory`
+
+You can select a different working directory with the function setwd(), and thus avoid entering the full path of the data files.
+
+`setwd("<new path>")   # set working directory`
+
+Note that the forward slash should be used as the path separator even on Windows platform.
+
+`setwd("C:/MyDoc")`

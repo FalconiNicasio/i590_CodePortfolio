@@ -1,0 +1,73 @@
+---
+title: "Regular Expressions"
+author: "Olga Scrivner"
+date: "1/25/2019"
+output:
+  html_document:
+    df_print: paged
+---
+
+### RegEx Methods
+Install library `strings`
+
+```{r echo=FALSE, warning=FALSE, message = FALSE}
+library(stringr)
+library(htmlwidgets)
+library(tidyverse)
+library(readr)
+```
+
+```{r}
+x <- c("apple", "banana", "pear")
+str_view(x, "an")
+```
+
+import text file
+```{r}
+text <- read_lines("../data/scraping.txt")
+text[1:3]
+```
+
+extract string - test
+```{r}
+str_extract_all(text, "[0-9]+")[[1]] # list 
+```
+
+build regex
+`[a-zA-Z]+\s[0-9][0-9],\s[0-9]{4}`
+
+```{r}
+dates <- regex("
+[a-zA-Z]+
+\\s
+[0-9]
+[0-9]
+,
+\\s
+[0-9]{4}
+", comments = TRUE)
+```
+Match regex - print all
+```{r}
+str_match(text, dates)
+```
+Create vector for dates
+```{r}
+results = str_match(text, dates)
+count = 1
+dates_vector = list()
+for (i in results){
+  if (!is.na(i)){
+    dates_vector[[count]] <- i
+    count <- count + 1
+  }
+}
+```
+transform Date format
+```{r}
+
+dates_vector %>%
+  str_replace_all(c("," = ""," " = "/","March" = "3", "February" = "2"))
+```
+
+

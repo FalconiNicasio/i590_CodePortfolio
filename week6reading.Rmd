@@ -1,0 +1,347 @@
+---
+title: "Practical Statistics for Data Scientists"
+author: "Andrew Bruce, Peter Bruce"
+date: "March 5, 2019"
+output: 
+  html_document:
+    toc: true
+---
+
+## Chapter 1. Exploratory Data Analysis
+
+### Elements of Structured Data
+
+
+#### Rectangular Data
+
+*Table 1-1. A typical data format*
+```{r, echo=FALSE}
+state <- read.csv(file="../../data/state.csv")
+head(state)
+```
+
+#### Estimates of Location
+```{r}
+mean(state[["Population"]])
+mean(state[["Population"]], trim=0.1)
+median(state[["Population"]])
+```
+
+### Estimates of Variability
+
+Location is just one dimension in summarizing a feature. A second dimension, variability, also referred to as dispersion, measures whether the data values are tightly clustered or spread out.
+
+>"At the heart of statistics lies variability: measuring it, reducing it, distinguishing random from real variability, identifying the various sources of real variability, and making decisions in the presence of it."
+
+```
+KEY TERMS FOR VARIABILITY METRICS
+```
+***Deviations***
+
+|   The difference between the observed valuies and the estimate of location.
+
+|       Synonyms: errors, residuals
+
+
+***Variance***
+
+|     The sum of squared deviations from the mean divided by n-1 where *n* is the number of data values.
+|           Synonyms : mean-squared-error
+
+
+***Mean absolute deviation***
+|     The mean of the absolute value of the deviatgions from the mean.
+|             Synonyms: l1-norm, Manhattan norm
+
+
+***Median absolute deviation from he median***
+|     The median of the absoluite value of the deviations from the median.
+
+
+***Range***
+|     The difference between the largest and the smallest value in a data set.
+
+
+***Order statistics***
+|     Metrics based on the data values sorted from smallest to biggest.
+|           Synonyms: ranks
+
+
+***Percentile***
+|     The value such that P percent of the values take on this value or less and (100-P) percent take on this value or more.
+|           Synonyms: quantile
+
+
+***Interquartile range***
+|     The difference between the 75th percentile and the 25th percentile
+|             IQR
+
+
+>"Neither the variance, the standard deviation, nor the mean absolute deviation is robust to outliers and extreme values "
+
+Median absolute deviation from the median (aka MAD) is robust like the median.
+
+Variance, standard deviation, mean absolute deviation, and median absolute deviation from the median are not equivalent estimates, even on normal distributions.
+
+|       standard deviation > mean absolute deviation > median absolute deviation
+
+#### Estimates Based on Percentiles
+
+*Order statistics* is estimating dispersion based on looking at the spread of the sorted data.
+
+|     *range* : the difference between the largest and smallest number
+|           min and max can help identify outliers
+
+Other examples of *order statistics* are percentiles and interquartile range (IQR)
+
+>"For very large data sets, calculating exact percentiles can be computationally very expensive since it requires sorting all the data values. Machine learning and statistical software use special algorithms, such as [Zhang-Wang-2007], to get an approximate percentile that can be calculated very quickly and is guaranteed to have a certain accuracy." 
+
+```{r}
+sd(state[["Population"]])
+IQR(state[["Population"]])
+mad(state[["Population"]])
+```
+
+### Exploring the Data Distribution
+
+```KEY TERMS FOR EXPLORING THE DISTRUBTION```
+
+***Boxplot***
+|       A plot introducted by Tukey as a quick way to visualize the distribution of data.
+|                 Synonyms: Box and whiskers plot
+
+***Frequency table***
+|       A tally of the count of numeric data values that fall into a set of intervals(bins).
+
+***Histogram***
+|       A plot of the frequency table with the bins on the x-axis and the count (or proportion) on the y-axis
+
+***Density plot***
+|       A smoothed version of the hisogram, often baased on a *kernal density estimate*.
+
+
+#### Percentiles and Boxplots
+
+```{r}
+quantile(state[["Murder.Rate"]], p=c(.05, .25, .5, .75, .95))
+```
+>"The median is 4 murders per 100,000 people, although there is quite a bit of variability: the 5th percentile is only 1.6 and the 95th percentile is 6.51."
+
+```{r, fig.height=7, fig.width=4}
+boxplot(state[["Population"]]/1000000, ylab="Population (millions)")
+```
+
+#### Frequency Table and Histograms
+
+```{r}
+breaks <- seq(from=min(state[["Population"]]),
+                to=max(state[["Population"]]), length=11)
+pop_freq <- cut(state[["Population"]], breaks=breaks,
+                right=TRUE, include.lowest = TRUE)
+table(pop_freq)
+```
+
+```{r}
+hist(state[["Population"]], breaks=breaks, xlab="Population")
+```
+
+#### Density Estimates
+
+```{r}
+hist(state[["Murder.Rate"]], freq=FALSE,  xlab="Murder Rate (per 100,000)", main="Density of state murder rates")
+lines(density(state[["Murder.Rate"]]), lwd=3, col="blue")
+```
+
+
+### Explporing Binary and Categorical Data
+
+```KEY TERMS FOR EXPLOPRING CATEGORICAL DATA```
+
+***Mode***
+|       The most commonly occuring category or valuie in a data set.
+
+***Expected value***
+|       When the categories can be associated with a numeric value, this gives an average value based on a category's probability of occurence.
+
+***Bar Charts***
+|       The frequency or proportion for each category plotted as bars.
+
+```{r}
+dfw <- read.csv(file="../../data/dfw_airline.csv")
+
+barplot(as.matrix(dfw)/6, cex.axis = .5)
+```
+
+***Pie Charts***
+|       The frequency or proportion for each category plotted as wedhges in a pie.
+
+>"The expected value is really a form of weighted mean: it adds the ideas of future expectations and probability weights, often based on subjective judgment. Expected value is a fundamental concept in business valuation and capital budgeting—for example, the expected value of five years of profits from a new acquisition, or the expected cost savings from new patient management software at a clinic."
+
+
+### Correlation
+
+```KEY TERMS FOR CORRELATION```
+
+***Correlation coefficient***
+
+|       A metric that measures the extent to which numeric variables are associated with one another(ranges from -1 to +1)
+
+***Correlation matrix***
+
+|       A table where the variables are shown on both rows and columns, and the cell values are the correlations between the variables
+
+***Scatterplot***
+
+|       A plot in which the x-axis is the value of one variable, and the y-axis the value of another.
+
+>"the correlation coefficient, which gives an estimate of the correlation between two variables that always lies on the same scale."
+
+```{r}
+sp500_px <- read.csv(file="../../data/sp500_data.csv")
+sp500_sym <- read.csv(file="../../data/sp500_sectors.csv")
+
+
+etfs <- sp500_px[row.names(sp500_px)>"2012-07-01",
+                 sp500_sym[sp500_sym$sector=="etf", 'symbol']]
+library(corrplot)
+corrplot(cor(etfs), method = "ellipse")
+```
+
+```KEY IDEAS FOR CORRELATION```
+
+* The correlation coefficient measures the extent to which two variables are associated with one another.
+
+*When high values of v1 go with high values of v2, v1 and v2 are positively correlated
+
+*When high values of v1 are associated with low values of v2, v1 and v2 are negatively correlated
+
+*The correlation coefficient is a standardized metric so taht is always ranges from -1(perfect negative correlations) to +1 (perfect positive correlation)
+
+* A correlatino coefficient of 0 indicated no correlation, but be aware that random arrangements of data will produce both positive and negative values for the correlation coeficient just by chance. 
+
+
+### Exploring Two or More Variables
+
+Estimators like mean and varianc e look at one variable at a time (univariate analysis).
+
+Correlation analysis compares two variables (bivariate analysis)
+
+This section will look at additional estimates and plots for more than two variables (multivariate analysis)
+
+```KEY TERMS FOR EXPLORING TWO OR MORE VARIABLES```
+
+***Contingency tables***
+
+|         A tally of counts between two or more categorical variables.
+
+
+***Hexagonal binning***
+
+|         A plot of two numeric variables with the records binned into hexagons.
+
+
+***Contour plots***
+
+|       A plot showing the density of two numeric variables like a topographical map
+
+
+***Violen plots***
+
+|       Similar to a boxplot but showing the density estimate.
+
+
+>"The appropriate type of bivariate or multivariate analysis depends on the nature of the data: numeric versus categorical."
+
+
+#### Hexagonal Binning and Contours (Plotting Numeric versus Numeric Data)
+
+```{r}
+kc_tax <- read.csv(file="../../data/kc_tax.csv")
+
+kc_tax0 <- subset(kc_tax, TaxAssessedValue < 750000 & SqFtTotLiving > 100 & SqFtTotLiving < 3500)
+nrow(kc_tax0)
+```
+
+
+```{r}
+library(ggplot2)
+
+ggplot(kc_tax0, aes(x=SqFtTotLiving, y=TaxAssessedValue) ) +
+  stat_binhex(color="white") +
+  theme_bw() +
+  scale_fill_gradient(low="white", high="blue") +
+  labs(x="Finished Square Feet", y="Tax Assessed Value")
+```
+*Figure 1-8. Hexagonal binning for tax_assessed value versus finished square feet*
+
+
+```{r}
+ggplot(kc_tax0, aes(SqFtTotLiving, TaxAssessedValue)) +
+  theme_bw() +
+  geom_point(alpha=0.1) +
+  geom_density2d(color="white") +
+  labs(x="Finished Square Feet", y="Tax Assessed Value")
+```
+*Figure 1-9. Contour plot for tax-assessed value versus finished square feet. 
+
+
+***Heat maps*** is another type of chart used to show the relationship between two numeric variables
+
+
+#### Two Categorical Variables
+
+*Table 1-8. Contingency table of loan grade and status*
+```{r}
+lc_loans <- read.csv(file="../../data/lc_loans.csv")
+
+library(descr)
+x_tab <- CrossTable(lc_loans$grade, lc_loans$status, prop.c=FALSE, prop.chisq=FALSE, prop.t=FALSE)
+x_tab
+```
+
+#### Categorical and Numeric Data
+
+```{r, fig.width=5, fig.height=8}
+airline_stats <- read.csv(file="../../data/airline_stats.csv")
+
+boxplot(pct_carrier_delay ~ airline, data=airline_stats, ylim=c(0,50), las=2)
+
+```
+*Figure 1-10. Boxplot of percent of airline delays by carrier
+
+>"Alaska stands out as having the fewest delays, while American has the most delays: the lower quartile for American is higher than the upper quartile for Alaska."
+
+
+```{r}
+ggplot(data=airline_stats, aes(airline, pct_carrier_delay)) +
+  ylim(0, 50) +
+  geom_violin() +
+  labs(x="", y="Daily % of Delayed Flights")
+```
+*Figure 1-11. Violin plot of percent of airline delays by carrier*
+
+
+#### Visualizing Multiple Variables
+
+***Faceting***
+
+```{r}
+ggplot(subset(kc_tax0, ZipCode %in% c(98188, 98105, 98108, 98126)),
+         aes(x=SqFtTotLiving, y=TaxAssessedValue)) +
+  stat_binhex(colour="white") +
+  theme_bw() +
+  scale_fill_gradient( low="white", high="blue") +
+  labs(x="Finished Square Feet", y="Tax Assessed Value") +
+  facet_wrap("ZipCode")
+```
+*Figure 1-12. Tax-assessed value versus finished square feet by zip code
+
+>"The concept of conditioning variables in a graphics system was pioneered with Trellis graphics, developed by Rick Becker, Bill Cleveland, and others at Bell Labs [Trellis-Graphics]. This idea has propagated to various modern graphics systems, such as the lattice [lattice] and ggplot2 packages in R and the Seaborn [seaborne] and Bokeh [bokeh] modules in Python. Conditioning variables are also integral to business intelligence platforms such as Tableau and Spotfire. With the advent of vast computing power, modern visualization platforms have moved well beyond the humble beginnings of exploratory data analysis. "
+
+```KEY IDEAS```
+
+* Hexagonal binning and contour plots are useful tools that permit graphical examination of two numeric variables at a time, without being overwhelmed by huge amounts of data.
+
+* Contingency tables are the standard tool for looking at the counts of two categorical variables.
+
+* Boxplots and violin plots allow you to plot a numeric variable against a categorical variable.
